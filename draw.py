@@ -7,7 +7,20 @@ from matrix import *
   # height and depth dimensions.
   # ====================
 def add_box( points, x, y, z, width, height, depth ):
-    pass
+    add_edge(points, x, y, z, x + width, y, z)
+    add_edge(points, x + width, y, z, x + width, y - height, z)
+    add_edge(points, x + width, y - height, z, x, y - height, z)
+    add_edge(points, x, y - height, z, x, y, z)
+
+    add_edge(points, x, y, z - depth, x + width, y, z - depth)
+    add_edge(points, x + width, y, z - depth, x + width, y - height, z - depth)
+    add_edge(points, x + width, y - height, z - depth, x, y - height, z - depth)
+    add_edge(points, x, y - height, z - depth, x, y, z - depth)
+
+    add_edge(points, x, y, z, x, y, z - depth)
+    add_edge(points, x + width, y, z, x + width, y, z - depth)
+    add_edge(points, x + width, y - height, z, x + width, y - height, z - depth)
+    add_edge(points, x, y - height, z, x, y - height, z - depth)
 
   # ====================
   # Generates all the points along the surface
@@ -16,7 +29,17 @@ def add_box( points, x, y, z, width, height, depth ):
   # Returns a matrix of those points
   # ====================
 def generate_sphere( points, cx, cy, cz, r, step ):
-    pass
+    edges = []
+    phi = 0
+    while phi < 2 * math.pi:
+        theta = 0
+        while theta < math.pi:
+            add_point(edges, (r * math.cos(theta) + cx),
+                      (r * math.sin(theta) * math.cos(phi) + cy),
+                      (r * math.sin(theta) * math.sin(phi) + cz))
+            theta += .2
+        phi += .2
+    return edges
 
   # ====================
   # adds all the points for a sphere with center 
@@ -25,8 +48,9 @@ def generate_sphere( points, cx, cy, cz, r, step ):
   # necessary points
   # ====================
 def add_sphere( points, cx, cy, cz, r, step ):
-    pass
-
+    edges = generate_sphere(points, cx, cy, cz, r, step)
+    for item in edges:
+        add_edge(points, item[0], item[1], item[2], item[0]+1, item[1]+1, item[2]+1)
 
   # ====================
   # Generates all the points along the surface
@@ -35,7 +59,17 @@ def add_sphere( points, cx, cy, cz, r, step ):
   # Returns a matrix of those points
   # ====================
 def generate_torus( points, cx, cy, cz, r0, r1, step ):
-    pass
+    edges = []
+    phi = 0
+    while phi < 2 * math.pi:
+        theta = 0
+        while theta < 2 * math.pi:
+            add_point(edges, math.cos(phi) * (r0 * math.cos(theta) + r1) + cx,
+                      r0 * math.sin(theta) + cy,
+                      -1 * math.sin(phi) * (r0 * math.cos(theta) + r1) + cz)
+            theta += .4
+        phi += .4
+    return edges
 
   # ====================
   # adds all the points for a torus with center
@@ -44,8 +78,9 @@ def generate_torus( points, cx, cy, cz, r0, r1, step ):
   # necessary points
   # ====================
 def add_torus( points, cx, cy, cz, r0, r1, step ):
-    pass
-
+    edges = generate_torus(points, cx, cy, cz, r0, r1, step)
+    for item in edges:
+        add_edge(points, item[0], item[1], item[2], item[0]+1, item[1]+1, item[2]+1)
 
 
 def add_circle( points, cx, cy, cz, r, step ):
@@ -54,14 +89,14 @@ def add_circle( points, cx, cy, cz, r, step ):
 
     i = 1
     while i <= step:
-        t = float(i)/step
-        x1 = r * math.cos(2*math.pi * t) + cx;
-        y1 = r * math.sin(2*math.pi * t) + cy;
+        t = float(i) / step
+        x1 = r * math.cos(2 * math.pi * t) + cx;
+        y1 = r * math.sin(2 * math.pi * t) + cy;
 
         add_edge(points, x0, y0, cz, x1, y1, cz)
         x0 = x1
         y0 = y1
-        t+= step
+        t += step
 
 def add_curve( points, x0, y0, x1, y1, x2, y2, x3, y3, step, curve_type ):
 
